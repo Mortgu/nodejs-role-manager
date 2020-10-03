@@ -5,11 +5,9 @@ const { ROLE, users, projects } = require('./data')
 const { authUser, authRole } = require('./basicAuth')
 const projectRouter = require('./routes/projects')
 
-const fetch = require('node-fetch')
 const mysql = require('mysql')
 const bodyParser = require('body-parser')
 const session = require('express-session')
-const { request } = require('express')
 const { scopedProjects } = require('./permissions/project')
 const project = require('./permissions/project')
 
