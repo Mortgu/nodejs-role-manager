@@ -15,7 +15,7 @@ var connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'blog'
+  database: 'zero'
 })
 
 app.use(session({
@@ -30,13 +30,17 @@ app.use('/projects', projectRouter)
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 
+app.use(express.static(__dirname + "/assets/css"))
+app.use(express.static(__dirname + "/assets/img"))
+
 app.get('/', (req, res) => {
-  res.render('index.ejs')
+  res.render('login.ejs')
 })
 
-app.get('/dashboard', authUser, (req, res) => {
-  //getProjects()
-  res.send('Dashboard Page')
+app.get('/files', getProjects, authUser, (req, res) => {
+  res.render('index.ejs', {projects:projects})
+
+  projects.length = 0;
 })
 
 app.get('/admin', authUser, authRole(ROLE.ADMIN), (req, res) => {
@@ -47,8 +51,7 @@ app.post('/auth', function(request, response, next) {
   var username = request.body.username
   var password = request.body.password
   if(username && password) {
-    getProjects()
-    connection.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
+    connection.query('SELECT * FROM accounts WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
         if(results.length > 0) {
           request.session.loggedin = true
           request.session.username = username
@@ -56,7 +59,7 @@ app.post('/auth', function(request, response, next) {
             request.session.userId = row.id
             request.session.role = row.role
           });
-          response.redirect('/dashboard')
+          response.redirect('/files')
         } else {
           response.send('Incorrect Username and/or Password!')
         }
@@ -68,16 +71,14 @@ app.post('/auth', function(request, response, next) {
   }
 })
 
-function getProjects() {
-  projects.length = 0;
-  connection.query('SELECT * FROM projects', function(error, results, fields) {
-      results.forEach(function (row) {
-        projects.push(row)
-      });
-  });
+function getProjects(req, res, next) {
+  connection.query('SELECT * FROM files' , function(error, results, fields) {
+    results.forEach(function(row){
+      projects.push(row)
+    })
+  })
+  next()
 }
-
-module.exports = {getProjects}
 
 function setUser(req, res, next) {
   const userId = session.userId

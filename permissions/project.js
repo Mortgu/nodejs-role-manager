@@ -16,8 +16,8 @@ function canDeleteProject(user, project) {
   return project.userId === user.userId
 }
 
-module.exports = {
-  canViewProject,
-  scopedProjects,
-  canDeleteProject
+function canEditProject(user, project) {
+    return project.userId === user.userId
 }
+
+module.exports = { canViewProject, scopedProjects, canDeleteProject }
